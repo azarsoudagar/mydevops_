@@ -1,0 +1,31 @@
+<VirtualHost *:80>
+    ServerAdmin neerajk@erdostechnologies.com
+    ServerName 52.205.42.16
+    ServerAlias 52.205.42.16
+    #DocumentRoot /var/www/example.com/html
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+    Alias /static /home/ubuntu/ramsey/ramsey/assets
+    <Directory "/home/ubuntu/ramsey/ramsey/assets">
+        Require all granted
+    </Directory>
+
+    Alias /media /home/ubuntu/ramsey/ramsey/media
+    <Directory "/home/ubuntu/ramsey/ramsey/media">
+        Require all granted
+    </Directory>
+
+    <Directory /home/ubuntu/ramsey/ramsey/ramsey>
+        <Files wsgi.py>
+            Require all granted
+        </Files>
+    </Directory>
+    WSGIPassAuthorization On
+    WSGIDaemonProcess mind python-path=/home/ubuntu/ramsey/ramsey python-home=/home/ubuntu/venv_ramsey
+    WSGIProcessGroup mind
+    WSGIApplicationGroup %{GLOBAL}
+    WSGIScriptAlias / /home/ubuntu/ramsey/ramsey/ramsey/wsgi.py
+</VirtualHost>
+
+

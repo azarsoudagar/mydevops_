@@ -1,0 +1,75 @@
+Teleport FE deploy
+
+- ssh teleport-web
+- curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh
+- wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash
+
+- sudo apt install git
+- sudo apt update
+- git clone repo
+- cat /proc/sys/fs/inotify/max_user_watches (DOC: https://stackoverflow.com/questions/53930305/nodemon-error-system-limit-for-number-of-file-watchers-reached)
+- sudo sysctl fs.inotify.max_user_watches=131070
+- sudo sysctl -p
+- echo fs.inotify.max_user_watches= 131070 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+
+- nvm install --lts
+- npm install --global nx@latest
+- npm install --include=dev
+- nx serve dashboard
+
+- go to etc/systemd/system
+- sudo nano nx.service 
+- go to teleport-web and run pwd (copy path file)
+- sudo nano /etc/systemd/system/nx.service (change path)
+- which nx
+
+- Open sudo nano /etc/systemd/system/nx.service 
+- Paste this
+	[Unit]
+	After=network.target
+
+	[Service]
+	#Environment=NODE_PORT=3000
+	Type=simple
+	User=admin
+	Restart=on-failure
+	WorkingDirectory=/home/admin/teleport-web
+	ExecStart=/home/admin/.nvm/versions/node/v20.10.0/bin/nx run dashboard:serve:development
+
+	[Install]
+	WantedBy=multi-user.target
+
+- sudo systemctl start nx
+- sudo systemctl status nx
+if inactive then check issue using this command "sudo journalctl -r"
+  - Download nodesource
+  - create deb repo
+  - sudo systemctl restart nx
+
+- Install nginx "sudo apt install nginx"
+
+- go to "sudo nano /etc/nginx/site-availables/teleport-web"
+- Add this data
+
+	upstream backend_hosts {
+	    server localhost:4200;
+	}
+	server {
+
+	    index index.html index.htm index.nginx-debian.html;
+	    
+	    server_name admin.develop.teleportmd.app;
+		rewrite ^/$ /login permanent;
+	    location / {
+		proxy_pass http://backend_hosts;
+	    }
+	}
+	
+- cd /etc/nginx
+- sudo ln -svrf sites-available/teleport-web sites-enabled/teleport-web
+-sudo systemctl restart nginx
+
+-ssh virtual-fi-nx
+or
+-ssh ims-dev
+-sudo reboot

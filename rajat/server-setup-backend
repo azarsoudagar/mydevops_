@@ -1,0 +1,56 @@
+STEPS TO SETUP SERVER BACKEND
+
+######### Add the ssh of the new server to you github/gitlab account and then proceed with the below steps. #########
+
+1. chmod 600 .pem file.
+
+2. Login to server using ssh -i {{you pem file}} ubuntu@{{ ip address or domain }}
+
+3. git clone your repository
+
+4. Make Virtualenv 
+
+*. sudo apt-get update
+
+4(a) sudo apt-get install python3-venv
+
+4(b) Create virtual environment and install all dependencies. If it shows any error and gives suggestions to download particular library, then download that as well.
+
+5. Setup apache2
+
+5(a). sudo apt-get install apache2
+
+5(b). write conf file for your backend in sites-available directory (/etc/apache2/sites-available)
+
+5(c). add that conf file to sites enable by "sudo a2ensite {{ your conf file name }} 
+
+5(d). restart apache 
+
+5(e). If it gives error for "WSGIPassAuthorization", then install library for that using "sudo apt-get install libapache2-mod-wsgi" then "sudo apt-get install libapache2-mod-wsgi-py3". 
+
+5(f). sudo a2ensite {{ conf file name }}
+
+6. Install Postgres using "sudo apt install postgresql postgresql-contrib"
+
+6(a). First change the authentication method for postgres to "trust" whereever "Peer" is mentioned in pg_hba.conf at /etc/postgres/main/10/pg_hba.conf
+
+6(b). Login to postgres using psql -U postgres (you will be allowed as authentication menthod is now trust) and restart postgres by "sudo service postgresql restart" change the password using "\password" command. Enter new password for postgres and change the authentication method to "md5" whereever trust is mentioned in pg_hba.conf.
+
+6(c). Create database and use that database in your production.py file.
+
+7. In production.py file, make sure "CORS_ORIGIN_ALLOW_ALL" = True.
+
+8. Runserver and check if any dependencies are missing, if missing install them.
+
+9. If all goes well, run "python manage.py migrate" and "python manage.py collectstatic" command.
+
+*. sudo chmod -R 777 media/*
+
+10. Goto wsgi.py file loaction and run this command "touch wsgi.py"
+
+11. Try to open your website on browser using your server name (That you mentioned in your apache conf file) and test if everything is working fine.
+
+12. If its shows forbidden error or 403, then check your conf file again. This error can occur due to misspell of directory name.
+
+
+					YOUR SERVER IS SET UP NOW YOU ARE GOOD TO GO
